@@ -62,6 +62,18 @@ st.markdown("""
         color: #ffffff !important;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
+
+    /* Top header bar - transparent background */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+        background-color: transparent !important;
+    }
+
+    /* Streamlit toolbar in header */
+    [data-testid="stToolbar"] {
+        background: transparent !important;
+        background-color: transparent !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
