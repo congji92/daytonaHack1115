@@ -5,27 +5,31 @@ SIMPLICITY: Just a simple system prompt + OpenAI call + Galileo monitoring
 No complex prompt engineering - keep it straightforward for hackathon demo
 """
 
+import time
+from typing import Tuple, Dict
 from openai import OpenAI
 from backend import config
 
 # Initialize OpenAI client
 client = OpenAI(api_key=config.OPENAI_API_KEY)
 
-# Initialize Galileo observer (optional - with error handling)
+# Initialize Galileo context (optional - with error handling)
 GALILEO_ENABLED = False
-galileo_workflows = None
 try:
-    from galileo_observe import Workflows
-    galileo_workflows = Workflows()
-    # Create a workflow for logging
-    galileo_workflows.add_workflow(name="codephoenix_workflow", project_name="codephoenix_hackathon")
+    from galileo import galileo_context
+
+    # Initialize Galileo with project and log stream
+    galileo_context.init(
+        project="codephoenix_hackathon",
+        log_stream="code_generation"
+    )
     GALILEO_ENABLED = True
-    print("[galileo] ✅ Galileo monitoring enabled")
+    print("[galileo] ✅ Galileo monitoring enabled (project: codephoenix_hackathon, stream: code_generation)")
 except Exception as e:
     print(f"[galileo] ⚠️  Galileo initialization failed: {str(e)[:100]}")
     print("[galileo]    LLM monitoring will be disabled but code generation will continue")
 
-def generate_code(user_prompt: str) -> str:
+def generate_code(user_prompt: str) -> Tuple[str, Dict]:
     """
     Generate Python code from a natural language prompt.
 
@@ -33,7 +37,8 @@ def generate_code(user_prompt: str) -> str:
         user_prompt: What the user wants the code to do
 
     Returns:
-        Generated Python code as a string
+        Tuple of (generated_code: str, metrics: dict)
+        metrics contains: model, tokens, latency_ms, estimated_cost
     """
     # Simple system prompt - no overthinking
     system_prompt = (
@@ -42,6 +47,9 @@ def generate_code(user_prompt: str) -> str:
         "Just pure Python code that can be run directly. "
         "If you need libraries, assume they are installed."
     )
+
+    # Start timing
+    start_time = time.time()
 
     # Call OpenAI
     response = client.chat.completions.create(
@@ -52,6 +60,9 @@ def generate_code(user_prompt: str) -> str:
         ]
     )
 
+    # Calculate latency
+    latency_ms = (time.time() - start_time) * 1000
+
     code = response.choices[0].message.content
 
     # Strip markdown if LLM added it despite instructions
@@ -60,20 +71,23 @@ def generate_code(user_prompt: str) -> str:
     elif "```" in code:
         code = code.split("```")[1].split("```")[0].strip()
 
-    # Log to Galileo if enabled
-    if GALILEO_ENABLED and galileo_workflows:
-        try:
-            from galileo_observe import Message, MessageRole
-            galileo_workflows.add_llm_step(
-                name="code_generation",
-                input=[
-                    Message(role=MessageRole.system, content=system_prompt),
-                    Message(role=MessageRole.user, content=user_prompt)
-                ],
-                output=Message(role=MessageRole.assistant, content=code),
-                model="gpt-4o"
-            )
-        except Exception as e:
-            print(f"[galileo] Warning: Failed to log LLM call: {e}")
+    # Extract performance metrics
+    usage = response.usage
+    metrics = {
+        "model": "gpt-4o",
+        "prompt_tokens": usage.prompt_tokens,
+        "completion_tokens": usage.completion_tokens,
+        "total_tokens": usage.total_tokens,
+        "latency_ms": round(latency_ms, 2),
+        # GPT-4o pricing: $2.50 per 1M input tokens, $10.00 per 1M output tokens
+        "estimated_cost": round(
+            (usage.prompt_tokens / 1_000_000 * 2.50) +
+            (usage.completion_tokens / 1_000_000 * 10.00),
+            4
+        )
+    }
 
-    return code
+    # Note: Galileo auto-instruments OpenAI when galileo_context.init() is called
+    # No manual logging needed - traces are automatically captured!
+
+    return code, metrics

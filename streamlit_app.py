@@ -129,8 +129,22 @@ if generate_btn and user_prompt:
     with st.status("Generating code with LLM...", expanded=True) as status:
         st.write("🔭 Galileo is monitoring this LLM call...")
         try:
-            code = generate_code(user_prompt)
+            code, metrics = generate_code(user_prompt)
             st.code(code, language='python', line_numbers=True)
+
+            # Display LLM performance metrics
+            st.write("**📊 LLM Performance Metrics:**")
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("Model", metrics['model'])
+            with col2:
+                st.metric("Tokens", f"{metrics['total_tokens']:,}",
+                         delta=f"{metrics['prompt_tokens']} in / {metrics['completion_tokens']} out")
+            with col3:
+                st.metric("Latency", f"{metrics['latency_ms']:.0f} ms")
+            with col4:
+                st.metric("Cost", f"${metrics['estimated_cost']:.4f}")
+
             status.update(label="✅ Code generated successfully!", state="complete")
         except Exception as e:
             st.error(f"Generation failed: {e}")

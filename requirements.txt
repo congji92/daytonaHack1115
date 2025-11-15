@@ -1,6 +1,6 @@
 streamlit
 openai
 sentry-sdk
-galileo-observe
+galileo
 python-dotenv
 daytona

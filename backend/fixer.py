@@ -11,15 +11,8 @@ from backend import config
 # Initialize OpenAI client
 client = OpenAI(api_key=config.OPENAI_API_KEY)
 
-# Initialize Galileo observer (optional - track fix generation)
-GALILEO_ENABLED = False
-galileo_workflows = None
-try:
-    from galileo_observe import Workflows
-    galileo_workflows = Workflows()
-    GALILEO_ENABLED = True
-except Exception:
-    pass  # Galileo already warned in generator.py
+# Galileo context initialized in generator.py
+# OpenAI calls are auto-instrumented - no additional setup needed here
 
 def fix_code(broken_code: str, error_message: str) -> str:
     """
@@ -121,17 +114,6 @@ Output ONLY the corrected Python code, no explanations or markdown.
     elif "```" in fixed_code:
         fixed_code = fixed_code.split("```")[1].split("```")[0].strip()
 
-    # Log to Galileo if enabled
-    if GALILEO_ENABLED and galileo_workflows:
-        try:
-            from galileo_observe import Message, MessageRole
-            galileo_workflows.add_llm_step(
-                name="code_fixing",
-                input=Message(role=MessageRole.user, content=fix_prompt),
-                output=Message(role=MessageRole.assistant, content=fixed_code),
-                model="gpt-4o"
-            )
-        except Exception as e:
-            print(f"[galileo] Warning: Failed to log fix generation: {e}")
+    # Note: Galileo auto-instruments OpenAI - this call is automatically logged
 
     return fixed_code
