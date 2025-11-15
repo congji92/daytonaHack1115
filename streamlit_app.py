@@ -21,13 +21,52 @@ from backend.sentry_helper import report_error
 
 # Page config
 st.set_page_config(
-    page_title="CodePhoenix - Self-Healing Code Generator",
+    page_title="CodePhoenix - gen-repair-execute",
     page_icon="🔥",
     layout="wide"
 )
 
+# Animated gradient background + liquid glass sidebar
+st.markdown("""
+<style>
+    /* Animated gradient background */
+    .stApp {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+    }
+
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Liquid glass sidebar */
+    [data-testid="stSidebar"] {
+        background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
+    }
+
+    /* Sidebar text color - white for visibility */
+    [data-testid="stSidebar"] * {
+        color: #ffffff !important;
+    }
+
+    /* Sidebar headers */
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3 {
+        color: #ffffff !important;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Title and description
-st.title("🔥 CodePhoenix: Self-Healing Code Generator")
+st.title("🔥 CodePhoenix: gen-repair-execute")
 st.caption("Running in **Daytona Workspace** | Powered by OpenAI, Galileo, Sentry & CodeRabbit")
 
 # Validate config
