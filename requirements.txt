@@ -1,0 +1,6 @@
+streamlit
+openai
+sentry-sdk
+galileo-observe
+python-dotenv
+daytona
