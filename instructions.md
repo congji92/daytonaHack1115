@@ -1,8 +1,88 @@
-# CodePhoenix: Self-Healing Code Generator
+# CodePhoenix: gen-repair-execute
+
+## 🎯 Current System Status
+
+**CodePhoenix** is a fully operational self-healing code generator that automatically detects, diagnoses, and repairs broken code using AI-powered workflows.
+
+### What It Does
+Generates Python code from natural language prompts, executes it in isolated cloud sandboxes, detects multiple error types (crashes, silent failures, handled exceptions), automatically fixes issues using AI code review, and re-executes until successful. The entire process is monitored with real-time LLM performance metrics and comprehensive error tracking.
+
+### Core Features
+- **Smart Error Detection**: Classifies errors into 3 types (crash, silent_failure, handled_exception) using pattern matching
+- **Multi-Level Monitoring**: Tracks execution outcomes, LLM performance (tokens, latency, cost), and error context
+- **Automatic Repair**: Specialized fix prompts for each error type with intelligent retry logic
+- **Beautiful UI**: Animated gradient background with liquid glass sidebar, real-time performance metrics display
+
+### Sponsor Integrations (4/4 Operational)
+1. **OpenAI GPT-4o**: Code generation and fixing with performance tracking
+2. **Daytona**: Cloud sandbox execution with automatic cleanup
+3. **Sentry**: Multi-level error reporting (errors for crashes, warnings for silent failures)
+4. **Galileo**: Auto-instrumented LLM observability with project-based tracing
+
+### Technical Stack
+- Backend: Python 3.11, modular architecture (generator, executor, fixer, sentry_helper)
+- Frontend: Streamlit with custom CSS (glassmorphism effects)
+- Total: ~400 lines of code across 8 modules
+- Testing: 7 test files covering all components individually and end-to-end
+
+### Architecture
+Modular monolith design - Streamlit imports backend modules directly (no API server). All LLM calls auto-instrumented by Galileo. Error classification happens at execution layer. File-based storage for generated code.
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+```bash
+# Create conda environment
+conda create -n daytonaHack1115 python=3.11
+conda activate daytonaHack1115
+```
+
+### Installation
+```bash
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Configuration
+Ensure `.env` file exists with all required API keys:
+```
+OPENAI_API_KEY=sk-...
+SENTRY_DSN=https://...@...ingest.sentry.io/...
+GALILEO_API_KEY=...
+DAYTONA_API_KEY=dtn_...
+DAYTONA_API_URL=https://app.daytona.io/api
+```
+
+### Run the Application
+```bash
+# Start Streamlit app
+streamlit run streamlit_app.py
+
+# Or with headless mode
+streamlit run streamlit_app.py --server.headless true
+```
+
+The app will open at **http://localhost:8501**
+
+### Run Tests
+```bash
+# Test individual components
+python test_1_llm.py              # LLM generation
+python test_2_daytona.py          # Daytona execution
+python test_3_sentry.py           # Sentry reporting
+python test_galileo_integration.py # Galileo tracing
+
+# Test full workflow
+python test_6_forced_failure.py   # End-to-end self-healing
+```
+
+---
 
 ## Philosophy: Radical Simplicity
 
-This is a **2-hour hackathon project** designed to showcase sponsor integrations, not build a production system.
+This is a **hackathon project** designed to showcase sponsor integrations through elegant service orchestration.
 
 ### Core Principle
 **Simple system prompt + Simple service orchestration = Powerful demo**
